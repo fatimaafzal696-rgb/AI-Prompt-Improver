@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PromptCraft AI - Transform your basic prompts into powerful, expert-level AI instructions using advanced prompt engineering techniques.">
+    <title>PromptCraft AI — Prompt Improver</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Background effects -->
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast" role="alert" aria-live="polite">
+        <span id="toast-icon" class="toast-icon"></span>
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- History Drawer -->
+    <div id="history-overlay" class="history-overlay" aria-hidden="true"></div>
+    <aside id="history-drawer" class="history-drawer" aria-label="Prompt History">
+        <div class="history-header">
+            <h2 class="history-title">
+                <span class="history-title-icon">🕘</span> Prompt History
+            </h2>
+            <button id="close-history-btn" class="close-history-btn" aria-label="Close history">✕</button>
+        </div>
+        <div id="history-list" class="history-list">
+            <div class="history-empty">
+                <div class="history-empty-icon">📝</div>
+                <p>No history yet. Start improving prompts!</p>
+            </div>
+        </div>
+        <div class="history-footer">
+            <button id="clear-history-btn" class="btn-ghost btn-sm">🗑 Clear All History</button>
+        </div>
+    </aside>
+
+    <!-- Main App -->
+    <div class="app-container">
+
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="brand-logo">
+                    <span class="logo-icon">⚡</span>
+                </div>
+                <div class="brand-text">
+                    <h1 class="brand-name">PromptCraft <span class="brand-accent">AI</span></h1>
+                    <p class="brand-tagline">Transform basic prompts into expert-level instructions</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="history-btn" class="btn-ghost btn-icon" aria-label="View prompt history" title="Prompt History">
+                    <span>🕘</span>
+                    <span id="history-count-badge" class="badge hidden">0</span>
+                </button>
+                <div class="api-status" id="api-status-indicator" title="API Status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Checking...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Left Panel: Input -->
+            <section class="panel panel-input" aria-label="Input panel">
+
+                <!-- Prompt Input -->
+                <div class="section-label">
+                    <span class="section-icon">✍️</span>
+                    <span>Your Prompt</span>
+                </div>
+                <div class="textarea-wrapper">
+                    <textarea
+                        id="prompt-input"
+                        class="prompt-textarea"
+                        placeholder="Write a YouTube script about Artificial Intelligence."
+                        aria-label="Enter your prompt here"
+                        maxlength="5000"
+                        spellcheck="true"
+                    ></textarea>
+                    <div class="textarea-footer">
+                        <div class="quick-examples">
+                            <span class="examples-label">Try an example:</span>
+                            <button class="example-chip" data-prompt="Write a YouTube script about Artificial Intelligence.">YouTube Script</button>
+                            <button class="example-chip" data-prompt="Create a marketing email for a new product launch.">Marketing Email</button>
+                            <button class="example-chip" data-prompt="Explain machine learning to a beginner.">ML Explainer</button>
+                            <button class="example-chip" data-prompt="Write a blog post about healthy habits.">Blog Post</button>
+                        </div>
+                        <div class="char-counter">
+                            <span id="char-count">0</span><span class="char-max">/5000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mode Selector -->
+                <div class="section-label" style="margin-top: 1.5rem;">
+                    <span class="section-icon">🎯</span>
+                    <span>Improvement Mode</span>
+                </div>
+                <div class="mode-grid" role="radiogroup" aria-label="Select improvement mode">
+                    <label class="mode-card" id="mode-better-card" for="mode-better" title="Improve grammar and clarity while keeping the prompt concise">
+                        <input type="radio" name="mode" id="mode-better" value="better" checked class="mode-radio" aria-checked="true">
+                        <div class="mode-icon">✨</div>
+                        <div class="mode-info">
+                            <span class="mode-name">Better</span>
+                            <span class="mode-desc">Grammar & clarity boost</span>
+                        </div>
+                        <div class="mode-badge mode-badge-better">Quick</div>
+                    </label>
+
+                    <label class="mode-card" id="mode-professional-card" for="mode-professional" title="Add context, structure, and professional-level instructions">
+                        <input type="radio" name="mode" id="mode-professional" value="professional" class="mode-radio" aria-checked="false">
+                        <div class="mode-icon">💼</div>
+                        <div class="mode-info">
+                            <span class="mode-name">Professional</span>
+                            <span class="mode-desc">Add context & structure</span>
+                        </div>
+                        <div class="mode-badge mode-badge-pro">Pro</div>
+                    </label>
+
+                    <label class="mode-card" id="mode-expert-card" for="mode-expert" title="Full expert prompt with role, objectives, constraints, format, audience, and success criteria">
+                        <input type="radio" name="mode" id="mode-expert" value="expert" class="mode-radio" aria-checked="false">
+                        <div class="mode-icon">🚀</div>
+                        <div class="mode-info">
+                            <span class="mode-name">Expert</span>
+                            <span class="mode-desc">Full expert-level rewrite</span>
+                        </div>
+                        <div class="mode-badge mode-badge-expert">Expert</div>
+                    </label>
+                </div>
+
+                <!-- Mode Details Card -->
+                <div id="mode-details" class="mode-details-card">
+                    <p id="mode-details-text">Fixes grammar and spelling errors, improves clarity and precision, and removes redundancy while keeping your original intent intact.</p>
+                </div>
+
+                <!-- Submit Button -->
+                <button id="improve-btn" class="btn-primary improve-btn" aria-label="Improve your prompt using AI">
+                    <span class="btn-content">
+                        <span class="btn-icon">⚡</span>
+                        <span class="btn-label">Improve Prompt</span>
+                    </span>
+                    <span class="btn-loading hidden">
+                        <span class="spinner"></span>
+                        <span>Crafting your prompt...</span>
+                    </span>
+                </button>
+
+            </section>
+
+            <!-- Right Panel: Output -->
+            <section class="panel panel-output" aria-label="Output panel">
+
+                <!-- Score Display -->
+                <div class="scores-row">
+                    <div class="score-card score-original">
+                        <div class="score-label">Original Score</div>
+                        <div class="score-circle-wrapper">
+                            <svg class="score-circle" viewBox="0 0 80 80" role="img" aria-label="Original quality score">
+                                <circle class="score-track" cx="40" cy="40" r="32"/>
+                                <circle class="score-fill score-fill-original" id="original-circle" cx="40" cy="40" r="32"/>
+                            </svg>
+                            <div class="score-value" id="original-score-val">—</div>
+                        </div>
+                    </div>
+
+                    <div class="score-arrow">
+                        <span class="arrow-icon">→</span>
+                        <span class="arrow-label">Improved</span>
+                    </div>
+
+                    <div class="score-card score-improved">
+                        <div class="score-label">Quality Score</div>
+                        <div class="score-circle-wrapper">
+                            <svg class="score-circle" viewBox="0 0 80 80" role="img" aria-label="Improved quality score">
+                                <circle class="score-track" cx="40" cy="40" r="32"/>
+                                <circle class="score-fill score-fill-improved" id="improved-circle" cx="40" cy="40" r="32"/>
+                            </svg>
+                            <div class="score-value" id="improved-score-val">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Toggle -->
+                <div class="view-toggle" role="tablist" aria-label="Output view mode">
+                    <button id="view-single-btn" class="view-toggle-btn active" role="tab" aria-selected="true" aria-controls="view-single">Improved Only</button>
+                    <button id="view-compare-btn" class="view-toggle-btn" role="tab" aria-selected="false" aria-controls="view-compare">Before vs After</button>
+                </div>
+
+                <!-- Single View -->
+                <div id="view-single" class="output-view active" role="tabpanel">
+                    <div class="section-label">
+                        <span class="section-icon">✅</span>
+                        <span>Improved Prompt</span>
+                        <div class="output-actions">
+                            <button id="copy-btn" class="btn-ghost btn-sm" aria-label="Copy improved prompt" disabled>
+                                <span>📋 Copy</span>
+                            </button>
+                            <button id="clear-btn" class="btn-ghost btn-sm" aria-label="Clear output" disabled>
+                                <span>🗑 Clear</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="output-box" class="output-box">
+                        <div class="output-placeholder">
+                            <div class="placeholder-icon">✨</div>
+                            <p>Your improved prompt will appear here.</p>
+                            <p class="placeholder-sub">Select a mode and click <strong>Improve Prompt</strong> to get started.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparison View -->
+                <div id="view-compare" class="output-view compare-view hidden" role="tabpanel">
+                    <div class="compare-grid">
+                        <div class="compare-col">
+                            <div class="compare-label compare-label-before">
+                                <span>⬤</span> Before
+                            </div>
+                            <div id="compare-before" class="compare-box compare-box-before"></div>
+                        </div>
+                        <div class="compare-divider" aria-hidden="true"></div>
+                        <div class="compare-col">
+                            <div class="compare-label compare-label-after">
+                                <span>⬤</span> After
+                            </div>
+                            <div id="compare-after" class="compare-box compare-box-after"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Improvements Made -->
+                <div id="improvements-section" class="improvements-section hidden">
+                    <div class="section-label">
+                        <span class="section-icon">🔧</span>
+                        <span>Improvements Applied</span>
+                    </div>
+                    <div id="improvements-list" class="improvements-list"></div>
+                    <div id="improvement-explanation" class="improvement-explanation"></div>
+                </div>
+
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Powered by <span class="footer-accent">Google Gemini AI</span> · Built with ❤️ using Python Flask</p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
